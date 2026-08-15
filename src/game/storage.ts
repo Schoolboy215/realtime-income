@@ -1,11 +1,20 @@
 // Persistence to the browser's localStorage — one save per browser (per user).
 const STORAGE_KEY = 'income-pooler-save'
 
+export interface RosterEntry {
+  name: string
+  rate: number
+  count: number
+}
+
 export interface SaveData {
-  version: 1
+  version: 3
   score: number
-  roster: Record<string, number> // unitId -> count owned
-  choices: string[] // current 3 offered unit ids
+  roster: Record<number, RosterEntry> // unitId -> snapshot + count owned
+  selectedRegionCode: string | null
+  selectedRegionName: string | null
+  choices: number[] // current 3 offered unit ids
+  lastSaveTime: number // epoch ms — used to catch up production on reload
 }
 
 export function loadSave(): SaveData | null {
@@ -13,9 +22,9 @@ export function loadSave(): SaveData | null {
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw)
-    if (parsed && parsed.version === 1) return parsed as SaveData
+    if (parsed && parsed.version === 3) return parsed as SaveData
   } catch {
-    // corrupt/old save, ignore and start fresh
+    // corrupt/old-shape save, ignore and start fresh
   }
   return null
 }

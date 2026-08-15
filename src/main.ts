@@ -14,14 +14,35 @@ app.use(pinia)
 // component, we pass `pinia` explicitly instead.
 const game = useGameStore(pinia)
 
-// Persist to localStorage after every state change, whatever it was.
-game.$subscribe((_mutation, state) => {
+// The tick loop mutates `score` ~10x/second, and $subscribe fires on every
+// mutation — writing to localStorage that often is wasted work for no
+// benefit, so routine writes are throttled to once per SAVE_THROTTLE_MS.
+// The visibilitychange/beforeunload handlers below are the real safety net
+// for "closed the tab right after picking something," bypassing the
+// throttle so that doesn't get lost.
+const SAVE_THROTTLE_MS = 5000
+let lastWriteAt = 0
+
+function persist() {
   writeSave({
-    version: 1,
-    score: state.score,
-    roster: state.roster,
-    choices: state.choices,
+    version: 3,
+    score: game.score,
+    roster: game.roster,
+    selectedRegionCode: game.selectedRegionCode,
+    selectedRegionName: game.selectedRegionName,
+    choices: game.choices,
+    lastSaveTime: Date.now(),
   })
+  lastWriteAt = Date.now()
+}
+
+game.$subscribe(() => {
+  if (Date.now() - lastWriteAt >= SAVE_THROTTLE_MS) persist()
 })
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') persist()
+})
+window.addEventListener('beforeunload', persist)
 
 app.mount('#app')

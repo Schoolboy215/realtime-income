@@ -14,9 +14,9 @@ const game = useGameStore()
       type="button"
       @click="game.pickUnit(unit.id)"
     >
-      <span class="icon">{{ unit.icon }}</span>
       <span class="name">{{ unit.name }}</span>
       <span class="rate">+{{ formatScore(unit.rate) }} / yr</span>
+      <span class="weight">{{ unit.weight.toLocaleString() }} employed in {{ game.selectedRegionName }}</span>
     </button>
   </div>
 </template>
@@ -32,7 +32,7 @@ const game = useGameStore()
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   padding: 1rem 0.5rem;
   border-radius: 0.75rem;
   border: 1px solid var(--border);
@@ -48,9 +48,6 @@ const game = useGameStore()
 .choice-card:active {
   transform: scale(0.97);
 }
-.icon {
-  font-size: 1.8rem;
-}
 .name {
   font-weight: 600;
   text-align: center;
@@ -59,6 +56,11 @@ const game = useGameStore()
   color: var(--accent);
   font-variant-numeric: tabular-nums;
   font-size: 0.9rem;
+}
+.weight {
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 @media (max-width: 560px) {
