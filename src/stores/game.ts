@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { fetchRegions, fetchShard, rollWeightedChoices, type RegionInfo, type UnitRow } from '../game/units'
 import { loadSave, type RosterEntry, type SaveData } from '../game/storage'
+import { RateUnit } from '../game/constants'
 import { scoreEarned } from '../game/time'
 
 const TICK_MS = 100 // recalculate score 10x/second
@@ -27,6 +28,7 @@ export const useGameStore = defineStore('game', {
     return {
       score: saved?.score ?? 0,
       roster: saved?.roster ?? ({} as Record<number, RosterEntry>),
+      rateUnit: saved?.rateUnit ?? RateUnit.YEAR,
       selectedRegionCode: saved?.selectedRegionCode ?? (null as string | null),
       selectedRegionName: saved?.selectedRegionName ?? (null as string | null),
       choices: saved?.choices ?? ([] as number[]),
@@ -48,9 +50,16 @@ export const useGameStore = defineStore('game', {
     totalRate: (state) =>
       Object.values(state.roster).reduce((sum, entry) => sum + entry.rate * entry.count, 0),
 
+    // Name comes from the (already-loaded, since region is locked in)
+    // shard rather than the roster entry itself — see the comment on
+    // RosterEntry in storage.ts for why.
     rosterEntries: (state) =>
       Object.entries(state.roster)
-        .map(([id, entry]) => ({ id: Number(id), ...entry }))
+        .map(([idStr, entry]) => {
+          const id = Number(idStr)
+          const unit = state.shardUnits.find(u => u.id === id)
+          return { id, name: unit?.name ?? `Unit #${id}`, rate: entry.rate, count: entry.count }
+        })
         .sort((a, b) => b.rate - a.rate),
 
     // Looks the offered ids up in the currently loaded shard to get full
@@ -59,6 +68,9 @@ export const useGameStore = defineStore('game', {
       state.choices
         .map(id => state.shardUnits.find(u => u.id === id))
         .filter((u): u is UnitRow => !!u),
+
+    getRateUnit: (state) => state.rateUnit,
+
   },
 
   actions: {
@@ -151,9 +163,15 @@ export const useGameStore = defineStore('game', {
       const existing = this.roster[id]
       this.roster[id] = existing
         ? { ...existing, count: existing.count + 1 }
-        : { name: unit.name, rate: unit.rate, count: 1 }
+        : { rate: unit.rate, count: 1 }
 
       this.rerollChoices()
+    },
+
+    changeRateUnit() {
+      const units = Object.values(RateUnit)
+      const currentIndex = units.indexOf(this.rateUnit)
+      this.rateUnit = units[(currentIndex + 1) % units.length]
     },
   },
 })

@@ -7,7 +7,7 @@ const game = useGameStore()
 
 <template>
   <div class="roster">
-    <h2>Your Roster</h2>
+    <h2>Your Roster ({{game.rosterEntries.length}})</h2>
     <p v-if="game.rosterEntries.length === 0" class="empty">
       Pick your first unit above to start earning.
     </p>

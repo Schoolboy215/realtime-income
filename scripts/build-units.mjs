@@ -5,9 +5,11 @@ import { parse } from 'csv-parse/sync'
 import { readFileSync, writeFileSync, rmSync, mkdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { loadTitleOverrides } from './lib/title-overrides.mjs'
 
 const rootDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
 const csvPath = path.join(rootDir, 'data', 'units.csv')
+const overridesPath = path.join(rootDir, 'data', 'title-overrides.csv')
 const outDir = path.join(rootDir, 'public', 'data')
 
 function slugify(text) {
@@ -29,6 +31,14 @@ function main() {
       return value
     },
   })
+
+  const titleOverrides = loadTitleOverrides(overridesPath)
+  let missingOverrides = 0
+  function singularName(rawTitle) {
+    if (titleOverrides.has(rawTitle)) return titleOverrides.get(rawTitle)
+    missingOverrides++
+    return rawTitle // fall back to the raw (plural) title rather than fail the build
+  }
 
   // public/data/ is fully generated — wipe it so stale shards from a
   // previous run (e.g. a renamed/removed region) never linger.
@@ -53,7 +63,7 @@ function main() {
     // {id, name, ...} objects. Same data, no repeated key names per row.
     const shard = {
       id: regionRows.map(r => r.ID),
-      name: regionRows.map(r => r.OCC_TITLE),
+      name: regionRows.map(r => singularName(r.OCC_TITLE)),
       weight: regionRows.map(r => r.TOT_EMP),
       rate: regionRows.map(r => r.A_MEAN),
     }
@@ -66,6 +76,13 @@ function main() {
 
   console.log(`Built ${manifest.length} region shard(s) from ${rows.length} row(s):`)
   for (const m of manifest) console.log(`  ${m.region.padEnd(22)} (${m.code}) ${String(m.count).padStart(6)} rows -> ${m.file}`)
+
+  if (missingOverrides > 0) {
+    console.warn(
+      `\nWarning: ${missingOverrides} title(s) had no entry in title-overrides.csv and were used as-is (still plural).`,
+      '\nRun `node scripts/generate-title-overrides.mjs` and review the new rows it adds.',
+    )
+  }
 }
 
 main()

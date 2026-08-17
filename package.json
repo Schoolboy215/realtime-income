@@ -19,6 +19,7 @@
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.9.1",
     "csv-parse": "^7.0.2",
+    "pluralize": "^8.0.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
     "vue-tsc": "^3.3.8"

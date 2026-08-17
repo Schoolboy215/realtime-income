@@ -1,16 +1,28 @@
 // Persistence to the browser's localStorage — one save per browser (per user).
 const STORAGE_KEY = 'income-pooler-save'
 
+import { RateUnit } from "./constants"
+
+// `name` is deliberately NOT stored here — it's looked up live from the
+// loaded region shard instead (see the rosterEntries getter), so a display
+// cleanup (e.g. the OCC_TITLE singularization pass) applies to old picks
+// too, not just ones made after the cleanup existed. Safe to do only
+// because region is locked in at game start, so the roster's units are
+// always a subset of the one shard that's already loaded.
+//
+// `rate` IS still snapshotted — unlike the name, it directly determines
+// score, so a past pick's earning power shouldn't silently change if the
+// underlying wage data is ever revised.
 export interface RosterEntry {
-  name: string
   rate: number
   count: number
 }
 
 export interface SaveData {
-  version: 3
+  version: 4
   score: number
-  roster: Record<number, RosterEntry> // unitId -> snapshot + count owned
+  rateUnit: RateUnit
+  roster: Record<number, RosterEntry> // unitId -> rate snapshot + count owned
   selectedRegionCode: string | null
   selectedRegionName: string | null
   choices: number[] // current 3 offered unit ids
@@ -22,7 +34,7 @@ export function loadSave(): SaveData | null {
   if (!raw) return null
   try {
     const parsed = JSON.parse(raw)
-    if (parsed && parsed.version === 3) return parsed as SaveData
+    if (parsed && parsed.version === 4) return parsed as SaveData
   } catch {
     // corrupt/old-shape save, ignore and start fresh
   }

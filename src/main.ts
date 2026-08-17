@@ -25,8 +25,9 @@ let lastWriteAt = 0
 
 function persist() {
   writeSave({
-    version: 3,
+    version: 4,
     score: game.score,
+    rateUnit: game.rateUnit,
     roster: game.roster,
     selectedRegionCode: game.selectedRegionCode,
     selectedRegionName: game.selectedRegionName,
