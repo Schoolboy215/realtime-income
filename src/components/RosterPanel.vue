@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { formatScore } from '../game/format'
-import { useGameStore } from '../stores/game'
+  import { formatScore } from '../game/format'
+  import { useGameStore } from '../stores/game'
+  import { computed } from 'vue'
 
-const game = useGameStore()
+  const game = useGameStore()
+  const rosterCount = computed(() => {
+    let ret = 0
+    for (let i = 0; i < game.rosterEntries.length; i++) {
+      ret += game?.rosterEntries?.at(i)?.count ?? 0;
+    }
+    return ret
+  })
 </script>
 
 <template>
   <div class="roster">
-    <h2>Your Roster ({{game.rosterEntries.length}})</h2>
+    <h2>Your Roster ({{rosterCount}})</h2>
     <p v-if="game.rosterEntries.length === 0" class="empty">
       Pick your first unit above to start earning.
     </p>

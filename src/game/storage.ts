@@ -21,6 +21,8 @@ export interface RosterEntry {
 export interface SaveData {
   version: 4
   score: number
+  goal: number
+  selectedGoal: boolean
   rateUnit: RateUnit
   roster: Record<number, RosterEntry> // unitId -> rate snapshot + count owned
   selectedRegionCode: string | null
@@ -43,4 +45,8 @@ export function loadSave(): SaveData | null {
 
 export function writeSave(data: SaveData): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+export function clearSave(): void {
+  localStorage.removeItem(STORAGE_KEY)
 }

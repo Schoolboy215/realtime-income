@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { fetchRegions, fetchShard, rollWeightedChoices, type RegionInfo, type UnitRow } from '../game/units'
-import { loadSave, type RosterEntry, type SaveData } from '../game/storage'
+import { clearSave, loadSave, type RosterEntry, type SaveData } from '../game/storage'
 import { RateUnit } from '../game/constants'
 import { scoreEarned } from '../game/time'
 
@@ -27,6 +27,8 @@ export const useGameStore = defineStore('game', {
     const saved = initialSave
     return {
       score: saved?.score ?? 0,
+      goal: saved?.goal ?? 0,
+      selectedGoal: saved?.selectedGoal ?? false,
       roster: saved?.roster ?? ({} as Record<number, RosterEntry>),
       rateUnit: saved?.rateUnit ?? RateUnit.YEAR,
       selectedRegionCode: saved?.selectedRegionCode ?? (null as string | null),
@@ -34,6 +36,11 @@ export const useGameStore = defineStore('game', {
       choices: saved?.choices ?? ([] as number[]),
 
       welcomeBack: null as WelcomeBack | null,
+
+      // Set right before an intentional reset (clearSave + reload), so
+      // main.ts's persist() can skip the write it would otherwise fire in
+      // response — see resetGame() below.
+      resetting: false,
 
       // Not persisted — re-fetched as needed. See init().
       regions: [] as RegionInfo[],
@@ -121,6 +128,15 @@ export const useGameStore = defineStore('game', {
       this.welcomeBack = null
     },
 
+    // Wipes the save and reloads, rather than resetting fields in place —
+    // that way `state()`'s defaults stay the single source of truth for
+    // "what a fresh save looks like" instead of duplicating it here.
+    resetGame() {
+      this.resetting = true
+      clearSave()
+      location.reload()
+    },
+
     async loadRegionsList() {
       this.regionsLoading = true
       this.regionsError = null
@@ -173,5 +189,9 @@ export const useGameStore = defineStore('game', {
       const currentIndex = units.indexOf(this.rateUnit)
       this.rateUnit = units[(currentIndex + 1) % units.length]
     },
+
+    setGoal(goal: number) {
+      this.goal = goal
+    }
   },
 })

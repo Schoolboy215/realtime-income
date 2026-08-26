@@ -5,13 +5,14 @@
 
   const game = useGameStore()
   const scoreText = computed(() => formatScore(game.score))
+  const goalText = computed(() => formatScore(game.goal))
   const rateText = computed(() => formatScore(game.totalRate, game.getRateUnit))
 </script>
 
 <template>
   <div class="score-panel">
-    <div class="score-value">${{ scoreText }}</div>
-    <div class="score-rate">{{ rateText }} /
+    <div class="score-value">${{ scoreText }}/{{goalText}}</div>
+    <div class="score-rate">${{ rateText }} /
       <button type="button" class="rate-unit-button" @click="game.changeRateUnit()">{{game.getRateUnit}}</button>
     </div>
   </div>

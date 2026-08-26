@@ -5,6 +5,7 @@ import App from './App.vue'
 import { useGameStore } from './stores/game'
 import { writeSave } from './game/storage'
 
+
 const pinia = createPinia()
 const app = createApp(App)
 app.use(pinia)
@@ -20,13 +21,16 @@ const game = useGameStore(pinia)
 // The visibilitychange/beforeunload handlers below are the real safety net
 // for "closed the tab right after picking something," bypassing the
 // throttle so that doesn't get lost.
-const SAVE_THROTTLE_MS = 5000
+const SAVE_THROTTLE_MS = 30000
 let lastWriteAt = 0
 
 function persist() {
+  if (game.resetting) return
   writeSave({
     version: 4,
     score: game.score,
+    goal: game.goal,
+    selectedGoal: game.selectedGoal,
     rateUnit: game.rateUnit,
     roster: game.roster,
     selectedRegionCode: game.selectedRegionCode,

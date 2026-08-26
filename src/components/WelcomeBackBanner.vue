@@ -11,14 +11,14 @@ const text = computed(() => {
 </script>
 
 <template>
-  <div v-if="game.welcomeBack" class="banner">
+  <div v-if="game.welcomeBack" class="notice">
     <span>{{ text }}</span>
     <button type="button" @click="game.dismissWelcomeBack">✕</button>
   </div>
 </template>
 
 <style scoped>
-.banner {
+.notice {
   display: flex;
   align-items: center;
   justify-content: center;

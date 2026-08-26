@@ -4,6 +4,7 @@
   import ChoicesPanel from './components/ChoicesPanel.vue'
   import RosterPanel from './components/RosterPanel.vue'
   import RegionPicker from './components/RegionPicker.vue'
+  import GoalPicker from './components/GoalPicker.vue'
   import WelcomeBackBanner from './components/WelcomeBackBanner.vue'
   import { useGameStore } from './stores/game'
 
@@ -20,6 +21,7 @@
     <h1>Income Pooler</h1>
 
     <RegionPicker v-if="!game.selectedRegionCode" />
+    <GoalPicker v-else-if="game.selectedRegionCode && !game.selectedGoal"/>
     <template v-else>
       <p v-if="game.shardLoading" class="status">Loading {{ game.selectedRegionName }}…</p>
       <p v-else-if="game.shardError" class="status error">{{ game.shardError }}</p>
@@ -29,6 +31,8 @@
         <RosterPanel />
       </template>
     </template>
+
+    <button type="button" class="reset-button" @click="game.resetGame()">Reset save</button>
   </main>
 </template>
 
@@ -37,6 +41,22 @@
     max-width: 720px;
     margin: 0 auto;
     padding-bottom: 3rem;
+    position: relative;
+  }
+  .reset-button {
+    display: block;
+    margin: 2rem auto 0;
+    padding: 0.3rem 0.6rem;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+  .reset-button:hover {
+    opacity: 1;
+    text-decoration: underline;
   }
   h1 {
     text-align: center;
