@@ -6,6 +6,8 @@ occupations and stack their combined annual earnings toward a goal.
 It's easy to look at a number like $1M/year and know that it means one million dollars in one year.
 But this will let you see that million dollars arrive in real time. Progress is saved when the tab isn't open and you can check back in any time to catch up.
 
+Everything saved is local to your browser.
+
 ---
 
 ## Tech stack
