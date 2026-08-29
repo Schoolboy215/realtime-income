@@ -1,5 +1,5 @@
 // Persistence to the browser's localStorage — one save per browser (per user).
-const STORAGE_KEY = 'income-pooler-save'
+const STORAGE_KEY = 'realtime-income-save'
 
 import { RateUnit } from "./constants"
 

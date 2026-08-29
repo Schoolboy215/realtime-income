@@ -14,8 +14,11 @@ export interface RegionInfo {
   count: number
 }
 
+// Vite rewrites asset imports for `base`, but not string literals passed to
+// fetch(), so the base has to be prepended by hand. import.meta.env.BASE_URL
+// always ends in a slash ('/' locally, '/realtime-income/' on GitHub Pages).
 export async function fetchRegions(): Promise<RegionInfo[]> {
-  const res = await fetch('/data/regions.json')
+  const res = await fetch(`${import.meta.env.BASE_URL}data/regions.json`)
   if (!res.ok) throw new Error(`Failed to load region list (${res.status})`)
   return res.json()
 }
@@ -30,7 +33,7 @@ interface ShardColumns {
 }
 
 export async function fetchShard(file: string): Promise<UnitRow[]> {
-  const res = await fetch(`/data/${file}`)
+  const res = await fetch(`${import.meta.env.BASE_URL}data/${file}`)
   if (!res.ok) throw new Error(`Failed to load unit data (${res.status})`)
   const shard: ShardColumns = await res.json()
   return shard.id.map((id, i) => ({

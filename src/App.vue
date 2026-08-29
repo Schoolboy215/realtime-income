@@ -32,7 +32,7 @@
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
   <main>
-    <h1 v-if="game.introSeen">Income Pooler</h1>
+    <h1 v-if="game.introSeen">Realtime income</h1>
     <IntroScreen v-if="!game.introSeen" />
     <RegionPicker v-else-if="!game.selectedRegionCode" />
     <GoalPicker v-else-if="game.selectedRegionCode && !game.selectedGoal"/>
