@@ -11,11 +11,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.3.0",
+    "naive-ui": "^2.45.2",
     "pinia": "^4.0.3",
     "vue": "^3.5.40"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
+    "@vicons/carbon": "^0.13.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/tsconfig": "^0.9.1",
     "csv-parse": "^7.0.2",

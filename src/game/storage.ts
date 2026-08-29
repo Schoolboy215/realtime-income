@@ -29,6 +29,8 @@ export interface SaveData {
   selectedRegionName: string | null
   choices: number[] // current 3 offered unit ids
   lastSaveTime: number // epoch ms — used to catch up production on reload
+  introSeen?: boolean // absent on saves from before this field existed
+  saveStartedAt?: number // epoch ms when this save was first created; absent on older saves
 }
 
 export function loadSave(): SaveData | null {

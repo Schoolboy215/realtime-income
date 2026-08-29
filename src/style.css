@@ -9,7 +9,7 @@
   --accent-contrast: #06170c;
   --text: #f2f4f8;
 
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--text);
   background-color: var(--bg);
 }

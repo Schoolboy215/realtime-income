@@ -1,20 +1,38 @@
 <script setup lang="ts">
   import { computed } from 'vue'
-  import { formatScore } from '../game/format'
+  import { formatScore, getRateUnitFactor } from '../game/format'
   import { useGameStore } from '../stores/game'
+  import { NProgress, useThemeVars } from 'naive-ui'
 
   const game = useGameStore()
   const scoreText = computed(() => formatScore(game.score))
   const goalText = computed(() => formatScore(game.goal))
   const rateText = computed(() => formatScore(game.totalRate, game.getRateUnit))
+  const remainText = computed(() => {
+    const diff = game.goal - game.score
+    const remainTime = diff / game.totalRate
+    const rateUnitFactor = 1 / getRateUnitFactor(game.getRateUnit)
+    return formatScore(remainTime * rateUnitFactor)
+  })
+  const themeVars = useThemeVars()
 </script>
 
 <template>
   <div class="score-panel">
     <div class="score-value">${{ scoreText }}/{{goalText}}</div>
+    <n-progress
+      type="line"
+      :percentage="(game.score / game.goal) * 100"
+      :color="game.score / game.goal < 1 ? themeVars.infoColor : themeVars.successColor"
+      :show-indicator=false
+      processing
+    />
     <div class="score-rate">${{ rateText }} /
       <button type="button" class="rate-unit-button" @click="game.changeRateUnit()">{{game.getRateUnit}}</button>
     </div>
+    <p v-if="game.score && game.score < game.goal">You'll reach your goal in {{ remainText }} {{ game.getRateUnit.toLowerCase() }}s</p>
+    <p v-else-if="game.score">You reached your goal!</p>
+    <p v-else>Start building out your roster to track progress</p>
   </div>
 </template>
 
@@ -28,6 +46,7 @@
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  padding-bottom: 5px;
 }
 .score-rate {
   margin-top: 0.4rem;

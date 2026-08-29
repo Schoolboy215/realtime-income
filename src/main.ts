@@ -1,5 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/600.css'
 import './style.css'
 import App from './App.vue'
 import { useGameStore } from './stores/game'
@@ -35,6 +37,8 @@ function persist() {
     roster: game.roster,
     selectedRegionCode: game.selectedRegionCode,
     selectedRegionName: game.selectedRegionName,
+    introSeen: game.introSeen,
+    saveStartedAt: game.saveStartedAt,
     choices: game.choices,
     lastSaveTime: Date.now(),
   })

@@ -16,7 +16,7 @@ const game = useGameStore()
     >
       <span class="name">{{ unit.name }}</span>
       <span class="rate">+{{ formatScore(unit.rate) }} / yr</span>
-      <span class="weight">{{ unit.weight.toLocaleString() }} employed in {{ game.selectedRegionName }}</span>
+      <span class="weight">{{ unit.weight.toLocaleString() }} in {{ game.selectedRegionName }}</span>
     </button>
   </div>
 </template>

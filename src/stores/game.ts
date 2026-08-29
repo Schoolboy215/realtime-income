@@ -3,6 +3,8 @@ import { fetchRegions, fetchShard, rollWeightedChoices, type RegionInfo, type Un
 import { clearSave, loadSave, type RosterEntry, type SaveData } from '../game/storage'
 import { RateUnit } from '../game/constants'
 import { scoreEarned } from '../game/time'
+import { message } from '../game/message'
+import { formatDuration, formatScore } from '../game/format'
 
 const TICK_MS = 100 // recalculate score 10x/second
 
@@ -16,18 +18,13 @@ let initialSave: SaveData | null = null
 // it to trigger a re-render or an autosave.
 let lastTickAt = 0
 
-export interface WelcomeBack {
-  seconds: number
-  earned: number
-}
-
 export const useGameStore = defineStore('game', {
   state: () => {
     initialSave = loadSave()
     const saved = initialSave
     return {
       score: saved?.score ?? 0,
-      goal: saved?.goal ?? 0,
+      goal: saved?.goal ?? 1000000,
       selectedGoal: saved?.selectedGoal ?? false,
       roster: saved?.roster ?? ({} as Record<number, RosterEntry>),
       rateUnit: saved?.rateUnit ?? RateUnit.YEAR,
@@ -35,7 +32,16 @@ export const useGameStore = defineStore('game', {
       selectedRegionName: saved?.selectedRegionName ?? (null as string | null),
       choices: saved?.choices ?? ([] as number[]),
 
-      welcomeBack: null as WelcomeBack | null,
+      // Only show the intro to genuinely new players — anyone with a prior
+      // save (even one from before this field existed) is treated as
+      // already having seen it, so it doesn't interrupt an existing game.
+      introSeen: saved?.introSeen ?? Boolean(saved),
+
+      // When this save was first created. A brand new save gets "now". A
+      // save that predates this field has no real record of when it
+      // started — lastSaveTime is the closest approximation available
+      // (at least a genuine past moment, rather than pretending it's new).
+      saveStartedAt: saved?.saveStartedAt ?? saved?.lastSaveTime ?? Date.now(),
 
       // Set right before an intentional reset (clearSave + reload), so
       // main.ts's persist() can skip the write it would otherwise fire in
@@ -105,8 +111,10 @@ export const useGameStore = defineStore('game', {
           // Only worth telling the player about if it's not just "the
           // normal gap between two ticks" — avoids a "welcome back!" banner
           // on every ordinary page refresh.
-          if (elapsedSeconds >= 5) {
-            this.welcomeBack = { seconds: elapsedSeconds, earned }
+          if (elapsedSeconds >= 5 && earned > 0) {
+            message.create(`Welcome back! You were away ${formatDuration(elapsedSeconds)} and earned $${formatScore(earned)}`,
+              { closable: true, duration: 10000}
+            )
           }
         }
       }
@@ -124,8 +132,8 @@ export const useGameStore = defineStore('game', {
       this.score += scoreEarned(this.totalRate, elapsedSeconds)
     },
 
-    dismissWelcomeBack() {
-      this.welcomeBack = null
+    dismissIntro() {
+      this.introSeen = true
     },
 
     // Wipes the save and reloads, rather than resetting fields in place —
