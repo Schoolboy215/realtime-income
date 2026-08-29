@@ -105,14 +105,15 @@ client-side router).
 
 ### The base-path gotcha
 
-`vite.config.ts` sets Vite's `base` to `/realtime-income/` **only when the
-`GITHUB_ACTIONS` env var is present**, and to `/` otherwise. `base` has to match
-the path the app is served from:
+`vite.config.ts` sets Vite's `base` to `/` — correct for serving from the root
+of a domain. If you serve from a subpath instead, `base` has to match it:
 
 - **Domain root** (`https://example.com/`) — the default `/` is correct;
   nothing to change.
 - **A subpath** (`https://example.com/games/income/`) — set
   `base: '/games/income/'`.
+- **A GitHub Pages project site with no custom domain**
+  (`https://<user>.github.io/<repo>/`) — set `base: '/<repo>/'`.
 
 The runtime `fetch()` calls in `src/game/units.ts` build their URLs from
 `import.meta.env.BASE_URL`, so they follow `base` automatically — but only if
@@ -120,13 +121,14 @@ The runtime `fetch()` calls in `src/game/units.ts` build their URLs from
 
 ### GitHub Pages
 
-`.github/workflows/deploy.yml` builds and deploys on every push to `master` (it
-runs with `GITHUB_ACTIONS` set, so the `/realtime-income/` base kicks in). To
-use it:
+`.github/workflows/deploy.yml` builds and deploys on every push to `master`.
+`public/CNAME` pins the custom domain so the deploy doesn't clear it. To use
+this for your own deploy:
 
-1. The repo must be named `realtime-income`, or change both `/realtime-income/`
-   strings in `vite.config.ts` to match your repo name.
-2. Repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+1. Repo **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+2. Either set your own domain in `public/CNAME` (and point a DNS `CNAME` record
+   at `<user>.github.io`), or delete `public/CNAME` and set
+   `base: '/<repo>/'` in `vite.config.ts` to serve from the github.io subpath.
 3. Push. The workflow's deploy job prints the live URL.
 
 ### Netlify / Vercel / nginx / Caddy / etc.
